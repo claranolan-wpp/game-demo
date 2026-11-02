@@ -4,14 +4,14 @@
 ## Big Idea
 I want to create a game that is an ecosystem simulator where the player's end goal is to maintain an equilibrium between the various species present. The species can evolve over time and follow group patterns, have inheritance, etc. Each individual animal will require water and food. The player is able to shape the environment to include more water or to spawn in more of a specific species, like a sandbox.
 
-## Classes
-    -GameLogic
-    -Creature
-        -Coyote
-        -Wolves
-        -Rabbits
-        -Birds
-    -Producers (grass, berries, crops)
+## Classes and Structure
+    -Animal class 
+    -Methods for terrain generation and map formation
+    -Core loop for managing simulation ticks and updates along with UI updates
+
+## How to Play
+Players can click on the two buttons in the left-hand corner to add more bunnies or coyotes in order to maintain both populations above zero. Players can also alter the terrain in order to add more resources like grass or water to help balance the population using **right-click or left-click**. To spawn a new map, players can press **R**.
+  
 
 
 ## References
