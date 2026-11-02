@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+from pandas import io
 import pygame
 import pandas as pd
 from noise import pnoise2
 import random
 import numpy as np
-
+import io
 import requests
 import json
 from google.oauth2 import service_account
@@ -14,56 +15,60 @@ import base64
 
 # ---------------------------Audio Setup ---------------------------
 
-# # Load credentials from your service account file
-# creds = service_account.Credentials.from_service_account_file(
-#     "keys/service.json",
-#     scopes=["https://www.googleapis.com/auth/cloud-platform"],
-# )
+# Load credentials from your service account file
+creds = service_account.Credentials.from_service_account_file(
+    "keys/service.json",
+    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+)
 
-# # Fetch an access token (this is what gcloud auth print-access-token returns)
-# creds.refresh(Request())
-# token = creds.token
+# Fetch an access token (this is what gcloud auth print-access-token returns)
+creds.refresh(Request())
+token = creds.token
 
-# with open('keys/keys.json', 'r') as f:
-#     keys = json.load(f)
+with open('keys/keys.json', 'r') as f:
+    keys = json.load(f)
 
-# def get_audio(input):
+def get_audio(input):
 
-#     url = "https://aiplatform.googleapis.com/v1beta1/projects/wpp-cto-smartprod-sandbox/locations/global/interactions"
+    url = "https://aiplatform.googleapis.com/v1beta1/projects/wpp-cto-smartprod-sandbox/locations/global/interactions"
     
-#     headers = {
-#         "Authorization": f"Bearer {token}",
-#         "Content-Type": "application/json",
-#     }
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
    
-#     payload = {
-#       "model": "lyria-3-clip-preview",
-#       "input": [
-#         {
-#           "type": "text",
-#           "text": f"{input} catchy jingle tune about all the animals in the ecosystem simulation game, with a western theme, upbeat and fun, 30 seconds long, in mp3 format"
-#         }
-#       ]
-#     }
+    payload = {
+      "model": "lyria-3-clip-preview",
+      "input": [
+        {
+          "type": "text",
+          "text": f"{input}"
+        }
+      ]
+    }
    
 
-#     response = requests.post(url, headers=headers, json=payload)
-#     # print(response)
-#     # print(response.text)
-#     # print(response.status_code)
-#     # print(response.headers)
-#     data = response.json()
-#     return data["outputs"][2]["data"]
-#     print(data["outputs"][2]["data"])
+    response = requests.post(url, headers=headers, json=payload)
+    # print(response)
+    # print(response.text)
+    # print(response.status_code)
+    # print(response.headers)
+    data = response.json()
+    return data["outputs"][2]["data"]
+    print(data["outputs"][2]["data"])
 
-# x = get_audio("ecosystem simulation game with coyotes and bunnies")
+clip = get_audio("catchy jingle talking about adding more animals to the ecosystem simulation game, with a fun and playful tone, and a memorable melody.")
 
-# mp3_bytes = base64.b64decode(x)
-# Audio(mp3_bytes)
+mp3_bytes = base64.b64decode(clip)
+Audio(mp3_bytes)
+sound_file = io.BytesIO(mp3_bytes)
+
 
 
 # ---------------------------Start Game Setup ---------------------------
 pygame.init()
+pygame.mixer.init()
+sound = pygame.mixer.Sound(sound_file)
 
 # Window setup
 screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
@@ -114,7 +119,7 @@ coyote_sprite = pygame.image.load("coyote.png").convert_alpha()
 bunny_sprite = pygame.image.load("bunny.png").convert_alpha()
 
 # Resize sprites to fit the grid
-SPRITE_SIZE = (24, 24)
+SPRITE_SIZE = (BLOCK_SIZE-1, BLOCK_SIZE-1)  # how big grid cells are in pixels
 
 COYOTE_IMAGE = pygame.transform.smoothscale(
     coyote_sprite, SPRITE_SIZE
@@ -183,18 +188,19 @@ class Animal:
 
         self.move_animal(grid)
         self.age += 1
-        self.hunger += 0.01
+        self.hunger += 0.001
 
         if self.species == "bunny":
             if grid[self.x][self.y] == GRASS:
-                self.hunger = max(0, self.hunger - 0.3)
-                self.health = min(100, self.health + 0.2)
+                self.hunger = max(0, self.hunger - 0.2)
+                self.health = min(100, self.health + 0.15)
 
         elif self.species == "coyote":
             prey = [
                 animal for animal in animals
                 if animal.alive
                 and animal.species == "bunny"
+                # if bunny is close enough to the coyote, it can be eaten
                 and abs(animal.x - self.x) <= 1
                 and abs(animal.y - self.y) <= 1
             ]
@@ -205,17 +211,17 @@ class Animal:
                 self.hunger = max(0, self.hunger - 0.5)
                 self.health = min(100, self.health + 2)
 
-        #Defining death cases
+        # Defining death cases
         # Hunger damages health
         if self.hunger > 1:
             self.health -= self.hunger * 0.5
 
         # Disease event
-        if random.random() < 0.001:
-            self.health -= random.uniform(10, 40)
+        if random.random() < 0.004:
+            self.health -= random.uniform(10, 30)
 
         # Old age
-        max_age = 150 if self.species == "bunny" else 240
+        max_age = 150 if self.species == "bunny" else 250
 
         if self.age > max_age:
             self.health -= 2
@@ -227,11 +233,11 @@ class Animal:
         if self.health <= 0:
             self.alive = False
 
-#used to store all animals in the simulation
+# Used to store all animals in the simulation
 animals = []
 
 def spawn_animals(species, count, reproduction_rate, mortality_rate):
-    for _ in range(count):
+    for cell in range(count):
         x = random.randrange(cols)
         y = random.randrange(rows)
 
@@ -251,9 +257,10 @@ def spawn_animals(species, count, reproduction_rate, mortality_rate):
 
 
 def update_ecosystem(grid):
+    # Update all animals in the ecosystem
     for animal in animals[:]:
         animal.update(grid, animals)
-
+    # Remove dead animals from the list
     animals[:] = [
         animal for animal in animals
         if animal.alive
@@ -417,7 +424,7 @@ def generate_terrain(grid, elevation):
 
 def generate_river(grid, start_x=None):
   #Use drunken walk to carve a river from the top edge to the bottom edge of the grid
-
+    # reference: https://www.redblobgames.com/articles/drunken-walks/
     cols = len(grid)
     rows = len(grid[0])
 
@@ -474,6 +481,7 @@ def generate_river(grid, start_x=None):
         if not candidates:
             break
 
+        # Filter out already visited cells to avoid loops
         fresh = [
             candidate
             for candidate in candidates
@@ -513,7 +521,7 @@ def generate_map(cols, rows, river_count=2):
 
     return grid, elevation
 
-
+# Used for screen resizing and regenerating the map when the window size changes
 def update_dimensions():
     global width, height, cols, rows, grid, elevation_map
 
@@ -629,6 +637,7 @@ while running:
                     float(bunny_row["reproduction_rate_per_tick"]),
                     float(bunny_row["natural_mortality_per_tick"])
                 )
+                sound.play()
 
             # Add coyotes
             elif event.button == 1 and COYOTE_BUTTON.collidepoint(event.pos):
@@ -638,6 +647,7 @@ while running:
                     float(coyote_row["reproduction_rate_per_tick"]),
                     float(coyote_row["natural_mortality_per_tick"])
                 )
+                sound.play()
 
             # Handle painting terrain on the grid
 
