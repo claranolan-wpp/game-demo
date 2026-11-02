@@ -82,7 +82,7 @@ dt = 0
 BLOCK_SIZE = 25 # how big grid cells are in pixels
 WINDOW_SIZE = (1280, 720)
 FPS = 60
-TPS = 2.0 # ticks per second to be used for simulation updates
+TPS = 1.0 # ticks per second to be used for simulation updates
 tick_accumulator = 0.0 # used to track time for simulation updates
 paused = False 
 
@@ -149,7 +149,7 @@ class Animal:
     x: int
     y: int
     age: int = 0
-    health: float = 100.0
+    health: float = 500.0
     hunger: float = 0.0
     alive: bool = True
     reproduction_rate: float = 0.0 # from csv
@@ -192,24 +192,25 @@ class Animal:
 
         if self.species == "bunny":
             if grid[self.x][self.y] == GRASS:
-                self.hunger = max(0, self.hunger - 0.2)
-                self.health = min(100, self.health + 0.15)
-
+                self.hunger = max(0, self.hunger - 0.3)
+                self.health = min(100, self.health + 0.5)
+        ### FUTURE NOTE- Coyotes could also eat grass, but for now they only eat bunnies. Also can handle reproduction and other behaviors in the future.
         elif self.species == "coyote":
             prey = [
                 animal for animal in animals
                 if animal.alive
                 and animal.species == "bunny"
                 # if bunny is close enough to the coyote, it can be eaten
-                and abs(animal.x - self.x) <= 1
-                and abs(animal.y - self.y) <= 1
+                and abs(animal.x - self.x) <= 3
+                and abs(animal.y - self.y) <= 3
             ]
 
             if prey:
                 target = random.choice(prey)
                 target.alive = False
-                self.hunger = max(0, self.hunger - 0.5)
-                self.health = min(100, self.health + 2)
+                # coyote eats the bunny, reducing hunger and increasing health
+                self.hunger = max(0, self.hunger - 0.7)
+                self.health = min(100, self.health + 6.0)
 
         # Defining death cases
         # Hunger damages health
@@ -451,7 +452,7 @@ def generate_river(grid, start_x=None):
 
     max_steps = cols * rows * 3
 
-    for _ in range(max_steps):
+    for step in range(max_steps):
         if not (0 <= x < cols and 0 <= y < rows):
             break
 
@@ -481,24 +482,14 @@ def generate_river(grid, start_x=None):
         if not candidates:
             break
 
-        # Filter out already visited cells to avoid loops
-        fresh = [
-            candidate
-            for candidate in candidates
-            if (candidate[0], candidate[1]) not in visited
-        ]
+       # Remove already visited cells
+        candidates = [
+            candidate for candidate in candidates
+                if (candidate[0], candidate[1]) not in visited
+        ] or candidates
 
-        if fresh:
-            candidates = fresh
-
-        positions = [(cx, cy) for cx, cy, _ in candidates]
-        weights = [weight for _, _, weight in candidates]
-
-        x, y = random.choices(
-            positions,
-            weights=weights,
-            k=1,
-        )[0]
+        # Choose a random position based on its weight
+        x, y, w = random.choices(candidates, weights=[c[2] for c in candidates], k=1)[0]
 
 
 def generate_map(cols, rows, river_count=2):
@@ -560,7 +551,7 @@ def draw_grid():
             pygame.draw.rect(screen, GRID_COLOR, rect, 1)
 
 
-# Generate the initial world.
+# Generate the initial world
 if cols > 0 and rows > 0:
     grid, elevation_map = generate_map(cols, rows)
 else:
