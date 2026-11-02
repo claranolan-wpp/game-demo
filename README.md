@@ -10,6 +10,7 @@ In undergrad, I used Unity to create an ecosystem simulator based off of conditi
     -Core loop for managing simulation ticks and updates along with UI updates
 
 ## How to Play
+Main file is game_original_logic.py 
 Players can click on the two buttons in the left-hand corner to add more bunnies or coyotes in order to maintain both populations above zero. Players can also alter the terrain in order to add more resources like grass or water to help balance the population using **right-click or left-click**. To spawn a new map, players can press **R**.
   
 
