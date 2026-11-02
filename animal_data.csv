@@ -1,0 +1,16 @@
+species_id,scientific_name,trophic_role,initial_population,reproduction_rate_per_tick,food_capacity_per_tick,natural_mortality_per_tick,disease_mortality_per_tick,starvation_mortality_per_tick,habitat_suitability_0_1,drought_tolerance_0_1,notes
+coyote,Canis latrans,predator,18,0.72,0.3,0.25,0.18,0.2,0.12,0.45,Primary predator; prey-selection research is the source context
+white_tailed_deer,Odocoileus virginianus,large_herbivore,10,0.25,0.55,0.08,0.02,0.03,0.7,0.65,Reported among preferred coyote prey; high forage demand
+mule_deer,Odocoileus hemionus,large_herbivore,7,0.23,0.5,0.08,0.02,0.03,0.65,0.62,Preference reported to increase at higher latitudes and coyote densities
+dalls_sheep,Ovis dalli,large_herbivore,3,0.2,0.45,0.06,0.01,0.02,0.55,0.55,Reported among preferred coyote prey; localized habitat in real ecosystems
+eastern_cottontail,Sylvilagus floridanus,small_herbivore,24,0.42,0.32,0.04,0.01,0.02,0.35,0.45,Reported among preferred coyote prey
+snowshoe_hare,Lepus americanus,small_herbivore,18,0.4,0.34,0.04,0.01,0.02,0.38,0.48,Selection reported to increase at higher latitudes
+black_tailed_jackrabbit,Lepus californicus,small_herbivore,16,0.38,0.32,0.04,0.01,0.02,0.36,0.46,Preference reported to increase toward the tropics; avoidance at higher coyote density
+california_vole,Microtus californicus,small_herbivore,30,0.48,0.28,0.03,0.01,0.02,0.3,0.4,Reported among preferred coyote prey
+least_chipmunk,Neotamias minimus,small_herbivore,20,0.42,0.26,0.02,0.01,0.01,0.25,0.35,Study summary reports significant avoidance
+american_beaver,Castor canadensis,large_herbivore,5,0.2,0.42,0.04,0.01,0.02,0.48,0.5,Study summary indicates no clear preference; low encounter rate is a game parameter
+birds,Aves,omnivore,22,0.35,0.24,0.03,0.01,0.01,0.22,0.3,Broad taxonomic category in study; treated as a generic game entity
+small_rodents,Rodentia spp.,small_herbivore,35,0.5,0.25,0.03,0.01,0.02,0.28,0.38,Generic prey guild; rodents were a common dietary group
+invertebrates,Invertebrata,detritivore,40,0.55,0.18,0.01,0.0,0.01,0.15,0.25,Generic prey guild; invertebrates occurred in dietary records
+vegetation,Plantae,producer,100,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Base food resource; abundance is a game starting value
+carrion,Dead_animal_biomass,resource,8,0.0,0.0,0.0,0.0,0.0,0.0,0.0,Optional resource node; included as a gameplay simplification
